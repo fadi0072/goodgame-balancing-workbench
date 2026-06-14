@@ -18,7 +18,7 @@ hero_id	level	name	class	rarity	hp	attack	defense	skill_id_1	skill_id_2	skill_id
 1	17	Mira	Ranger	Rare	2505	537	132	101	102	103	null	1522
 1	18	Mira	Ranger	Rare	2636	561	136	101	102	103	null	1590
 1	19	Mira	Ranger	Rare	2766	584	141	101	102	103	null	1656
-1	20	Mira	Ranger	Rare	2896	608	146	101	102	103	null	1725
+1	20	Mira	Ranger	Rare	2896	700	146	101	102	103	null	1909
 1	21	Mira	Ranger	Rare	3027	630	150	101	102	103	null	1788
 1	22	Mira	Ranger	Rare	3158	654	154	101	102	103	null	1855
 1	23	Mira	Ranger	Rare	3288	676	159	101	102	103	null	1919
