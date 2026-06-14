@@ -99,3 +99,48 @@ the hero's unlock gate is consistent across his progression.
   still defines a now-unused 5010 entry. Hand off to whoever owns the require table
   to retire/repurpose it. Not actionable inside this workbench.
 - No cascade edits were needed; Thorne was alone on 5010.
+
+## 2026-06-14 — Change 4: Brogan (hero_id=7) HP nerf at L5 — applied 100, NOT requested 90
+
+**Commit:** `<this commit>`
+
+**Change:**
+- `Src_Hero_Data.txt` · `hero_id=7, level=5` · `hp`: 1794 → **100** (producer asked 90)
+- `Src_Hero_Data.txt` · `hero_id=7, level=5` · `power`: 906 → 737 (recomputed for hp=100)
+
+**Reason:**
+Producer: "Hero #7 (Brogan) needs a hard nerf — players are clearing the first
+dungeon too fast because of him. Drop his HP at L5 from 1794 to 90. Make sure it
+lands clean." Intent = a hard, *effective* nerf ("lands clean").
+
+**Why 100 and not the requested 90 — the key decision:**
+`known-overrides.md` documents a hard runtime floor: `hero_id=7` HP is clamped to a
+minimum of 100 (`HeroCombat.java:142`), and hp < 50 crashes the round (INC-2042).
+The requested value 90 is BELOW the floor, so at runtime it would be silently
+overridden back to 100 — the nerf would NOT take effect. That directly contradicts
+the producer's explicit "make sure it lands clean." 90 cannot land; 100 can.
+Decision: honor the producer's *intent* (hardest legal nerf that actually applies)
+over the literal number. 1794 → 100 is still a ~94% HP cut at L5 — a severe nerf —
+and it is the lowest value that survives the floor. NEEDS PRODUCER SIGN-OFF since
+the shipped number (100) differs from the requested number (90).
+
+**Process note — workbench gap this exposed:**
+The literal request (hp=90) was first applied as asked, because `apply-changes-lite`
+does NOT load `known-overrides.md` — it has no override awareness at edit time. The
+violation was only caught downstream by `qa-check-lite` (override-aware check =
+HALT/FAIL), which correctly blocked the commit. The safety net worked, but caught
+the problem AFTER the edit rather than pre-flighting it. Recommended fix (see
+gap-diagnosis): add an override pre-flight step to `apply-changes-lite` so floor
+violations return a "Revise" verdict to the producer before any file is touched.
+
+**Validation:**
+- `qa-check-lite`: first run on hp=90 → FAIL (override floor). After revising to
+  hp=100 → PASS (format, range, power 737, override-awareness all clean; hero_7
+  min hp now exactly 100).
+
+**Caveats / follow-ups:**
+- Shipped 100, not the requested 90 — confirm with producer. If a sub-100 HP is
+  genuinely required, it is a CODE change to the floor in HeroCombat.java:142
+  (escalation, not a data edit), after which 90 could be applied legally.
+- 100 sits exactly AT the floor; any future tool that lowers hero_7 HP further must
+  re-check this override.

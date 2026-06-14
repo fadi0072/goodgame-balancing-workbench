@@ -183,7 +183,7 @@ hero_id	level	name	class	rarity	hp	attack	defense	skill_id_1	skill_id_2	skill_id
 7	2	Brogan	Warrior	Epic	1048	182	128	701	702	703	5015	661
 7	3	Brogan	Warrior	Epic	1296	204	136	701	702	703	5015	742
 7	4	Brogan	Warrior	Epic	1544	226	144	701	702	703	5015	822
-7	5	Brogan	Warrior	Epic	1794	248	154	701	702	703	5015	906
+7	5	Brogan	Warrior	Epic	100	248	154	701	702	703	5015	737
 7	6	Brogan	Warrior	Epic	2042	270	162	701	702	703	5015	987
 7	7	Brogan	Warrior	Epic	2290	292	170	701	702	703	5015	1068
 7	8	Brogan	Warrior	Epic	2538	314	178	701	702	703	5015	1149
