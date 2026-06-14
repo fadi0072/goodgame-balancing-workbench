@@ -67,3 +67,35 @@ by 10% at each level. Six rows in total." Applied attack×1.1 per level; recompu
 - A naive half-up power validator falsely flagged 12 pre-existing .5 rows (e.g.
   hero 1 L1, hero 6 L6) as drift; re-checking with round-half-to-even confirmed the
   baseline data is clean. No baseline rows were modified.
+
+## 2026-06-14 — Change 3: Thorne (hero_id=4) rebucketed unlock_require_id 5010 → 5005
+
+**Commit:** `<this commit>`
+
+**Change:**
+- `Src_Hero_Data.txt` · `hero_id=4, level=1–30` · `unlock_require_id`: 5010 → 5005
+  (all 30 Thorne rows; no other column touched, power unchanged)
+
+**Reason:**
+Producer: "We're rebucketing Hero #4 (Thorne) into the lower-tier unlock chain —
+change his unlock_require_id from 5010 to 5005." Applied to all 30 level rows so
+the hero's unlock gate is consistent across his progression.
+
+**Validation:**
+- `qa-check-lite`: PASS — format, range, override-awareness, power (unchanged) clean.
+- FK integrity: PASS. New value 5005 is an existing, populated chain — non-orphan.
+
+**FK chain analysis (the substance of this change):**
+- 5010 (left): Thorne was the **sole** member (30 rows, no other hero). The
+  file-mappings "update together" rule does NOT trigger — nothing else moves with
+  him. After this change **5010 is referenced by zero rows** in the data file.
+- 5005 (joined): already shared by Aldric (#2, Epic Warrior), Doran (#10, Common
+  Warrior), Roric (#16, Common Warrior). Thorne (Rare Warrior) joins cleanly — all
+  Warriors. "Lower-tier" = gating tier, not rarity; no conflict with intent.
+
+**Caveats / follow-ups:**
+- ORPHANED REQUIRE-ID: 5010 now has no referencing row. The data file is clean
+  (qa-check "can't see the require table"), but the external require table likely
+  still defines a now-unused 5010 entry. Hand off to whoever owns the require table
+  to retire/repurpose it. Not actionable inside this workbench.
+- No cascade edits were needed; Thorne was alone on 5010.
