@@ -31,3 +31,39 @@ the current cell (not stale).
   consistency check. Confirmed with the driver before editing.
 - Mira is `hero_id=1`; the only documented override (`known-overrides.md`) is the
   Hero #7 HP floor, which does not apply here.
+
+## 2026-06-14 — Change 2: Tessa (hero_id=11) attack curve +10% at L10–L15
+
+**Commit:** `<this commit>`
+
+**Change:**
+- `Src_Hero_Data.txt` · `hero_id=11, level=10–15` · `attack`: ×1.10 each level,
+  with `power` recomputed per row. Six rows. Samples:
+  - L10 · attack 375 → 413 · power 1062 → 1138
+  - L13 · attack 444 → 488 · power 1260 → 1348
+  - L15 · attack 490 → 539 · power 1391 → 1489
+  (full set: L10 413, L11 438, L12 464, L13 488, L14 515, L15 539)
+
+**Reason:**
+Producer: "Hero #11 (Tessa) needs a curve adjustment — boost her attack at L10–L15
+by 10% at each level. Six rows in total." Applied attack×1.1 per level; recomputed
+`power` per apply-changes-lite Step 5.
+
+**Validation:**
+- `qa-check-lite`: PASS — format, range, FK (require_id=5011 untouched, no orphans),
+  override-awareness (hero 7 unaffected), and power consistency all clean.
+
+**Caveats / follow-ups:**
+- ROUNDING CONVENTION (discovered this change): the producer said "+10%" with no
+  rounding rule. L10 (375×1.1 = 412.5) is the only value landing exactly on .5.
+  We rounded half-up → 413 (driver-confirmed). NOTE: the dataset's derived `power`
+  column is internally consistent under BANKER'S rounding (round-half-to-even =
+  Python `round()`, which is what qa-check-lite's `round(...)` formula actually
+  means); under that convention 412.5 → 412. Since `attack` is a base stat (not a
+  formula-derived column) and its power was correctly derived from 413, this creates
+  no integrity violation — but it's a latent gap: `apply-changes-lite` does not pin a
+  rounding rule for "+%" boosts, so a future bulk edit could silently disagree with
+  the house convention. Flagged for the gap-diagnosis writeup.
+- A naive half-up power validator falsely flagged 12 pre-existing .5 rows (e.g.
+  hero 1 L1, hero 6 L6) as drift; re-checking with round-half-to-even confirmed the
+  baseline data is clean. No baseline rows were modified.
